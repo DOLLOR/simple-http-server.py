@@ -32,7 +32,7 @@ while True:
     responseText += "%d\r\n" % (count)
 
     connect.send(bytes(responseText,"utf-8"))
-    connect.close()                # 关闭连接
+    connect.close()
 
 
 '''
