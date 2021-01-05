@@ -36,7 +36,6 @@ def init():
     while True:
         connect,addr = server.accept()
         count += 1
-        print(count)
         Process(target=onConnection, args=(connect,addr,count)).start()
         connect.close()
 
