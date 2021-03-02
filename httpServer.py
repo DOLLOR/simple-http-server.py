@@ -20,6 +20,7 @@ def createServer(port=8722,host='',onRequest=None):
             self.send_response(200)
             self.send_header('Server','My server')
             self.send_header('Access-Control-Allow-Origin','*')
+            self.send_header('Access-Control-Allow-Headers','*')
             self.send_header('Cache-Control','public, max-age=0')
             self.end_headers()
 
