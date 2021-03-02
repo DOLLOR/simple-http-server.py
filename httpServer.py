@@ -3,15 +3,18 @@ import http.server
 def createServer(port=8722,host='',onRequest=None):
     class Handler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
-            message = onRequest(None)
-            self.handlerSendHeader()
-            self.wfile.write(bytes(message, "utf8"))
+            self.handleRequest(None)
+        def do_OPTIONS(self):
+            self.handleRequest(None)
 
         def do_POST(self):
             # post body
             content_length = int(self.headers['Content-Length'])
             body = self.rfile.read(content_length)
 
+            self.handleRequest(body)
+
+        def handleRequest(self,body):
             message = onRequest(self,body)
             self.handlerSendHeader()
             self.wfile.write(bytes(message, "utf8"))
@@ -35,6 +38,9 @@ def createServer(port=8722,host='',onRequest=None):
 count = 0
 def onReq(handler,data):
     ip,port = handler.client_address
+    if data and data.decode:
+        data = data.decode('utf8')
+
     print(
         'from %s:%s' % (ip,port),
         handler.command,
@@ -43,7 +49,7 @@ def onReq(handler,data):
         handler.headers,
         '}\n',
         'Data: ',
-        data.decode('utf8'),
+        data,
         '\n-----------',
     )
     global count
