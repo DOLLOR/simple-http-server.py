@@ -42,10 +42,10 @@ def onReq(handler,data):
         data = data.decode('utf8')
 
     print(
-        'from %s:%s' % (ip,port),
+        f'from {ip}:{port}',
         handler.command,
         handler.path,
-        '\n{\n',
+        '\n{',
         handler.headers,
         '}\n',
         'Data: ',
