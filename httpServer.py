@@ -1,6 +1,13 @@
 import http.server
+import typing
 
-def createServer(port=8722,host='',onRequest=None):
+Handler = http.server.BaseHTTPRequestHandler
+
+def createServer(
+    port=8722,
+    host='',
+    onRequest:typing.Callable[[Handler,bytes|None],str]|None=None
+):
     class Handler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
             self.handleRequest(None)
@@ -14,10 +21,11 @@ def createServer(port=8722,host='',onRequest=None):
 
             self.handleRequest(body)
 
-        def handleRequest(self,body):
-            message = onRequest(self,body)
-            self.handlerSendHeader()
-            self.wfile.write(bytes(message, "utf8"))
+        def handleRequest(self,body:bytes|None):
+            if(onRequest):
+                message = onRequest(self,body)
+                self.handlerSendHeader()
+                self.wfile.write(bytes(message, "utf8"))
 
         def handlerSendHeader(self):
             self.send_response(200)
@@ -25,9 +33,10 @@ def createServer(port=8722,host='',onRequest=None):
             self.send_header('Access-Control-Allow-Origin','*')
             self.send_header('Access-Control-Allow-Headers','*')
             self.send_header('Cache-Control','public, max-age=0')
+            self.send_header('Content-Type','text/plain;charset=UTF-8')
             self.end_headers()
 
-        def log_request(code='-', size='-'):pass
+        def log_request(self,code='-', size='-'):pass
 
     server_address = (host, port)
     print('server is running')
@@ -36,24 +45,25 @@ def createServer(port=8722,host='',onRequest=None):
     return httpd
 
 count = 0
-def onReq(handler,data):
+def onReq(handler:Handler,data:bytes|None):
     ip,port = handler.client_address
+
+    body:bytes|str|None = data
     if data and data.decode:
-        data = data.decode('utf8')
+        body = data.decode('utf8')
 
     print(
-        f'from {ip}:{port}',
-        handler.command,
-        handler.path,
-        '\n{',
-        handler.headers,
-        '}\n',
-        'Data: ',
-        data,
-        '\n-----------',
+f'''
+from {ip}:{port}
+{handler.command} {handler.path}
+{handler.headers}
+data:
+{body}
+-----------
+'''
     )
     global count
     count = count + 1
-    return "server ok!\r\n%d" % (count)
+    return f"server ok!\r\n{count}\r\n{body}"
 
 createServer(onRequest=onReq)
