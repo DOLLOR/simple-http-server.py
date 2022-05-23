@@ -33,7 +33,7 @@ def createServer(
             self.send_header('Access-Control-Allow-Origin','*')
             self.send_header('Access-Control-Allow-Headers','*')
             self.send_header('Cache-Control','public, max-age=0')
-            self.send_header('Content-Type','text/plain;charset=UTF-8')
+            self.send_header('Content-Type','text/plain; charset=UTF-8')
             self.end_headers()
 
         def log_request(self,code='-', size='-'):pass
