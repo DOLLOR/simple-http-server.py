@@ -4,8 +4,8 @@ import typing
 Handler = http.server.BaseHTTPRequestHandler
 
 def createServer(
-    port=8722,
-    host='',
+    port:int=8722,
+    host:str='',
     onRequest:typing.Callable[[Handler,bytes|None],str]|None=None
 ):
     class Handler(http.server.BaseHTTPRequestHandler):
@@ -39,7 +39,7 @@ def createServer(
         def log_request(self,code='-', size='-'):pass
 
     server_address = (host, port)
-    print('server is running')
+    print(f'server is running {host} {port}')
     httpd = http.server.HTTPServer(server_address, Handler)
     httpd.serve_forever()
     return httpd
