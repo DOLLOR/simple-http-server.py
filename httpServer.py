@@ -3,10 +3,12 @@ import typing
 
 Handler = http.server.BaseHTTPRequestHandler
 
+OnRequestCallback = typing.Callable[[Handler,bytes|None],str]
+
 def createServer(
     port:int=8722,
     host:str='',
-    onRequest:typing.Callable[[Handler,bytes|None],str]|None=None
+    onRequest:OnRequestCallback|None=None,
 ):
     class Handler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
