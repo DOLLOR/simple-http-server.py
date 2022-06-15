@@ -1,5 +1,6 @@
 import http.server
 import typing
+import platform
 
 Handler = http.server.BaseHTTPRequestHandler
 
@@ -10,7 +11,7 @@ def createServer(
     host:str='',
     onRequest:OnRequestCallback|None=None,
 ):
-    class Handler(http.server.BaseHTTPRequestHandler):
+    class RequestHandler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
             self.handleRequest(None)
         def do_OPTIONS(self):
@@ -31,7 +32,7 @@ def createServer(
 
         def handlerSendHeader(self):
             self.send_response(200)
-            self.send_header('Server','My server')
+            self.send_header('Server',f'My server Python/{platform.python_version()}')
             self.send_header('Access-Control-Allow-Origin','*')
             self.send_header('Access-Control-Allow-Headers','*')
             self.send_header('Cache-Control','public, max-age=0')
@@ -41,31 +42,7 @@ def createServer(
         def log_request(self,code='-', size='-'):pass
 
     server_address = (host, port)
-    print(f'server is running {host} {port}')
-    httpd = http.server.HTTPServer(server_address, Handler)
+    print(f'server is running {host} {port} http://localhost:{port}')
+    httpd = http.server.HTTPServer(server_address, RequestHandler)
     httpd.serve_forever()
     return httpd
-
-count = 0
-def onReq(handler:Handler,data:bytes|None):
-    ip,port = handler.client_address
-
-    body:bytes|str|None = data
-    if data and data.decode:
-        body = data.decode('utf8')
-
-    print(
-f'''
-from {ip}:{port}
-{handler.command} {handler.path}
-{handler.headers}
-data:
-{body}
------------
-'''
-    )
-    global count
-    count = count + 1
-    return f"server ok!\r\n{count}\r\n{body}"
-
-createServer(onRequest=onReq)
