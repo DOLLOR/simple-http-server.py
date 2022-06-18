@@ -1,7 +1,21 @@
 from .httpServer import createServer,Handler,getRequestBody
 
 count = 0
-def onReq(handler:Handler):
+
+def onRequest(handler:Handler):
+    """http handler
+        ```js
+        fetch('http://localhost:8722/path/name?a=b',{
+        method:'POST',
+        body: JSON.stringify({
+            a: 1,
+            b: 'a',
+        }),
+        })
+        .then(i=>i.text())
+        .then(i=>console.log(i))
+        ```
+    """
     data = getRequestBody(handler)
     ip,port = handler.client_address
 
@@ -23,4 +37,4 @@ data:
     count = count + 1
     return f"server ok!\r\n{count}\r\n{body}"
 
-createServer(onRequest=onReq)
+createServer(onRequest=onRequest)

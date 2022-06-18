@@ -19,6 +19,8 @@ def createServer(
     host:str='',
     onRequest:OnRequestCallback|None=None,
 ):
+    """create http server
+    """
     class RequestHandler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
             self.handleRequest()
