@@ -1,7 +1,8 @@
-from .httpServer import createServer,Handler
+from .httpServer import createServer,Handler,getRequestBody
 
 count = 0
-def onReq(handler:Handler,data:bytes|None):
+def onReq(handler:Handler):
+    data = getRequestBody(handler)
     ip,port = handler.client_address
 
     body:bytes|str|None = data

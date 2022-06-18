@@ -4,7 +4,15 @@ import platform
 
 Handler = http.server.BaseHTTPRequestHandler
 
-OnRequestCallback = typing.Callable[[Handler,bytes|None],str]
+OnRequestCallback = typing.Callable[[Handler],str]
+
+def getRequestBody(handler: Handler) -> bytes|None:
+    if handler.headers['Content-Length']:
+        content_length = int(handler.headers['Content-Length'])
+        body = handler.rfile.read(content_length)
+        return body
+    else:
+        return None
 
 def createServer(
     port:int=8722,
@@ -13,20 +21,15 @@ def createServer(
 ):
     class RequestHandler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
-            self.handleRequest(None)
+            self.handleRequest()
         def do_OPTIONS(self):
-            self.handleRequest(None)
-
+            self.handleRequest()
         def do_POST(self):
-            # post body
-            content_length = int(self.headers['Content-Length'])
-            body = self.rfile.read(content_length)
+            self.handleRequest()
 
-            self.handleRequest(body)
-
-        def handleRequest(self,body:bytes|None):
+        def handleRequest(self):
             if(onRequest):
-                message = onRequest(self,body)
+                message = onRequest(self)
                 self.handlerSendHeader()
                 self.wfile.write(bytes(message, "utf8"))
 
