@@ -37,7 +37,7 @@ def createServer(
 
         def handlerSendHeader(self):
             self.send_response(200)
-            self.send_header('Server',f'My server Python/{platform.python_version()}')
+            self.send_header('Dollor-Server',f'My server Python/{platform.python_version()}')
             self.send_header('Access-Control-Allow-Origin','*')
             self.send_header('Access-Control-Allow-Headers','*')
             self.send_header('Cache-Control','public, max-age=0')
