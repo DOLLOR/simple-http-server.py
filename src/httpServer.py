@@ -6,7 +6,7 @@ Handler = http.server.BaseHTTPRequestHandler
 
 OnRequestCallback = typing.Callable[[Handler],str]
 
-def getRequestBody(handler: Handler) -> bytes|None:
+def getRequestBody(handler: Handler) -> typing.Optional[bytes]:
     if handler.headers['Content-Length']:
         content_length = int(handler.headers['Content-Length'])
         body = handler.rfile.read(content_length)
@@ -17,7 +17,7 @@ def getRequestBody(handler: Handler) -> bytes|None:
 def createServer(
     port:int=8722,
     host:str='',
-    onRequest:OnRequestCallback|None=None,
+    onRequest:typing.Optional[OnRequestCallback]=None,
 ):
     """create http server
     """
