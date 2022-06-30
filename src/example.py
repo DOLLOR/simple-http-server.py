@@ -1,4 +1,5 @@
 from .httpServer import createServer,Handler,getRequestBody
+import typing
 
 count = 0
 
@@ -19,7 +20,7 @@ def onRequest(handler:Handler):
     data = getRequestBody(handler)
     ip,port = handler.client_address
 
-    body:bytes|str|None = data
+    body:typing.Union[bytes,str,None] = data
     if data and data.decode:
         body = data.decode('utf8')
 
