@@ -4,7 +4,13 @@ import platform
 
 Handler = http.server.BaseHTTPRequestHandler
 
-OnRequestCallback = typing.Callable[[Handler],str]
+class OnRequestCallbackResult(typing.TypedDict):
+    data: typing.Union[str,bytes]
+    headers: typing.Optional[typing.Dict[str, str]]
+    statusCode: typing.Optional[int]
+
+OnRequestCallback = typing.Callable[[Handler], OnRequestCallbackResult]
+
 
 def getRequestBody(handler: Handler) -> typing.Optional[bytes]:
     if handler.headers['Content-Length']:
@@ -31,17 +37,32 @@ def createServer(
 
         def handleRequest(self):
             if(onRequest):
-                message = onRequest(self)
-                self.handlerSendHeader()
-                self.wfile.write(bytes(message, "utf8"))
+                result = onRequest(self)
+                self.handlerSendHeader(result)
+                if type(result['data']) == str:
+                    text = typing.cast(str,result['data'])
+                    data = bytes(text, "utf8")
+                else:
+                    data = typing.cast(bytes,result['data'])
+                self.wfile.write(data)
 
-        def handlerSendHeader(self):
-            self.send_response(200)
+        def handlerSendHeader(self, result: OnRequestCallbackResult):
+            if result['statusCode']: pass
+            else:
+                result['statusCode'] = 200
+
+            self.send_response(result['statusCode'])
             self.send_header('Dollor-Server',f'My server Python/{platform.python_version()}')
-            self.send_header('Access-Control-Allow-Origin','*')
-            self.send_header('Access-Control-Allow-Headers','*')
-            self.send_header('Cache-Control','public, max-age=0')
-            self.send_header('Content-Type','text/plain; charset=UTF-8')
+
+            if result['headers']:
+                for (key, value,) in result['headers'].items():
+                    self.send_header(key,value)
+            else:
+                self.send_header('Access-Control-Allow-Origin','*')
+                self.send_header('Access-Control-Allow-Headers','*')
+                self.send_header('Cache-Control','public, max-age=0')
+                self.send_header('Content-Type','text/plain; charset=UTF-8')
+
             self.end_headers()
 
         def log_request(self,code='-', size='-'):pass
