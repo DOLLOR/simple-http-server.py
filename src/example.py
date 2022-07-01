@@ -1,9 +1,9 @@
-from .httpServer import createServer,Handler,getRequestBody
+from .httpServer import createServer,Handler,getRequestBody,OnRequestCallbackResult
 import typing
 
 count = 0
 
-def onRequest(handler:Handler):
+def onRequest(handler:Handler) -> OnRequestCallbackResult:
     """http handler
         ```js
         fetch('http://localhost:8722/path/name?a=b',{
@@ -36,6 +36,11 @@ data:
     )
     global count
     count = count + 1
-    return f"server ok!\r\n{count}\r\n{body}"
+    return {
+        'data':f"server ok!\r\n{count}\r\n{body}",
+        'headers':None,
+        'statusCode':None
+    }
+    
 
 createServer(onRequest=onRequest)
