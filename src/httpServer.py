@@ -1,8 +1,11 @@
 import http.server
 import typing
 import platform
+import ssl
+# from _typeshed import StrOrBytesPath
 
 Handler = http.server.BaseHTTPRequestHandler
+StrOrBytesPath = typing.Union[str,bytes]
 
 class OnRequestCallbackResult(typing.TypedDict):
     data: typing.Union[str,bytes]
@@ -24,6 +27,8 @@ def createServer(
     port:int=8722,
     host:str='',
     onRequest:typing.Optional[OnRequestCallback]=None,
+    certfile:typing.Optional[StrOrBytesPath]=None,
+    keyfile:typing.Optional[StrOrBytesPath]=None,
 ):
     """create http server
     """
@@ -68,7 +73,18 @@ def createServer(
         def log_request(self,code='-', size='-'):pass
 
     server_address = (host, port)
-    print(f'server is running {host} {port} http://localhost:{port}')
     httpd = http.server.HTTPServer(server_address, RequestHandler)
+
+    if certfile and keyfile:
+        httpd.socket = ssl.wrap_socket(
+            httpd.socket,
+            server_side=True,
+            certfile=certfile,
+            keyfile=keyfile,
+        )
+        print(f'server is running {host} {port} https://localhost:{port}')
+    else:
+        print(f'server is running {host} {port} http://localhost:{port}')
+
     httpd.serve_forever()
     return httpd
